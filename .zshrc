@@ -73,6 +73,7 @@ ZSH_THEME="spaceship"
 plugins=(
   git
   zsh-autosuggestions
+  # zsh-vi-mode # not integrating well
   zsh-syntax-highlighting # must be last
 )
 
@@ -140,7 +141,13 @@ spaceship_space() {
 spaceship_line_two() {
   # line two config of spaceship prompt
   # | languages
-  spaceship::section "white" " ├"
+  spaceship::section "white" " ├──"
+}
+
+spaceship_line_three() {
+  # line two config of spaceship prompt
+  # | languages
+  spaceship::section "white" " └──"
 }
 
 # Starship customisations
@@ -179,6 +186,7 @@ SPACESHIP_PROMPT_ORDER=(
   kubectl       # Kubectl context section
   terraform     # Terraform workspace section
   line_sep      # Line break
+  line_three
   # battery       # Battery level and status
   vi_mode       # Vi-mode indicator
   jobs          # Background jobs indicator
@@ -195,7 +203,16 @@ SPACESHIP_PROMPT_ORDER=(
 
 # SPACESHIP_PROMPT_DEFAULT_PREFIX=""
 
-SPACESHIP_CHAR_PREFIX=" └─"
+# to remove the default one set last time
+# or in other words, to confirm thr isnt one
+SPACESHIP_CHAR_PREFIX=""
+# changes the char symbol to be different
+SPACESHIP_CHAR_SYMBOL="$ "
+# specifically change the root one
+# just changing charsymbol doesnt seem to work on root
+SPACESHIP_CHAR_SYMBOL_ROOT="$ "
+# for multiline commands
+SPACESHIP_CHAR_SYMBOL_SECONDARY="> "
 
 # time show config
 SPACESHIP_TIME_SHOW="true"
@@ -221,3 +238,6 @@ SPACESHIP_DIR_TRUNC_PREFIX="../"
 # Env variable config
 export GOPATH="$HOME/go"
 export PATH="$PATH:$GOPATH/bin:$HOME/.local/bin"
+
+# evals
+eval spaceship_vi_mode_enable # enable vi mode provided by spaceship prompt
