@@ -3,6 +3,8 @@ This repo contains most of my linux config files
 ---
 ## .zshrc
 `.zshrc` is the config file for my zsh
+## settings.json
+`settins.json` is the settings file for my vs code
 #### Prerequisites
 - zsh or zshell
 - the last 2 lines assume `go` is present and the directory `~/go/bin` is present
@@ -11,6 +13,13 @@ This repo contains most of my linux config files
   - Spaceship Prompt (theme for zsh)
   - zsh-syntax-highlighting
   - zsh-autosuggestion
+- VS Code
+  - Extensions
+    - Vim mode
+    - Go
+    - Rust
+- Fonts used:
+  - Cascadia Code
 ---
 ## TODO
 - create script to automate install of programs
