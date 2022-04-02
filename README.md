@@ -4,7 +4,9 @@ This repo contains most of my linux config files
 ## .zshrc
 `.zshrc` is the config file for my zsh
 ## settings.json
-`settins.json` is the settings file for my vs code
+`settings.json` is the settings file for my vs code
+## vue.json
+`vue.json` is the snippet file for autocompleting some tags of vue in vs code
 #### Prerequisites
 - zsh or zshell
 - the last 2 lines assume `go` is present and the directory `~/go/bin` is present
