@@ -1,0 +1,35 @@
+{
+	// Place your snippets for vue here. Each snippet is defined under a snippet name and has a prefix, body and 
+	// description. The prefix is what is used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. Placeholders with the 
+	// same ids are connected.
+	// Example:
+	"Script Setup": {
+		"prefix": ["ss", "script:setup"],
+		"body": [
+			"<script setup>",
+			"$1",
+			"</script>",
+			"$2"
+		],
+		"description": "Creates script setup tags"
+	},
+	"Template": {
+		"prefix": "template",
+		"body": [
+			"<template>",
+			"$1",
+			"</template>",
+			"$2"
+		],
+		"description": "Creates template tags"
+	},
+	"Style Scoped": {
+		"prefix": ["st:sc", "stsc", "style:scoped"],
+		"body": [
+			"<style scoped>",
+			"$1",
+			"</style>$2"
+		]
+	}
+}
