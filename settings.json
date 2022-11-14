@@ -1,5 +1,5 @@
 {
-    "workbench.colorTheme": "Winter is Coming (Dark Blue - No Italics)",
+    "workbench.colorTheme": "Andromeda Italic Bordered",
     "editor.fontFamily": "'Cascadia Code', 'Droid Sans Mono', 'monospace', monospace, 'Droid Sans Fallback'",
     "editor.fontSize": 22,
     "diffEditor.wordWrap": "on",
@@ -12,10 +12,10 @@
     "editor.fontLigatures": true,
     "vim.useSystemClipboard": true,
     "vim.handleKeys": {
-        "<C-d>": false,
+        "<C-d>": true,
         "<C-c>": false,
         "<C-a>": false,
-        "<C-P>": false
+        "<C-x>": false
     },
     "vim.insertModeKeyBindings": [
         // {
@@ -27,6 +27,7 @@
             "after": ["<Esc>"]
         }
     ],
+    "vim.timeout": 100,
     "editor.cursorBlinking": "phase",
     "editor.cursorSmoothCaretAnimation": true,
     "emmet.includeLanguages": {
@@ -34,4 +35,18 @@
     },
     "editor.tabSize": 2,
     "go.toolsManagement.autoUpdate": true,
+    "editor.linkedEditing": true,
+    "C_Cpp.codeAnalysis.updateDelay": 0,
+    "[html]": {
+        "editor.defaultFormatter": "vscode.html-language-features"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[css]": {
+        "editor.defaultFormatter": "vscode.css-language-features"
+    },
 }
