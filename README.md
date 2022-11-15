@@ -13,8 +13,9 @@ This repo contains most of my linux config files
 - oh-my-zsh
 - Plugins installed via oh-my-zsh
   - Spaceship Prompt (theme for zsh)
-  - zsh-syntax-highlighting
-  - zsh-autosuggestion
+  - [Spaceship Vi Mode](https://github.com/spaceship-prompt/spaceship-vi-mode)
+  - [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting/blob/master/INSTALL.md)
+  - [zsh-autosuggestion](https://github.com/zsh-users/zsh-autosuggestions/blob/master/INSTALL.md#oh-my-zsh)
 - VS Code
   - Extensions
     - Vim mode
