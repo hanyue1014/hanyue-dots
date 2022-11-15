@@ -73,7 +73,7 @@ ZSH_THEME="spaceship"
 plugins=(
   git
   zsh-autosuggestions
-  # zsh-vi-mode # not integrating well
+  spaceship-vi-mode
   zsh-syntax-highlighting # must be last
 )
 
@@ -135,19 +135,19 @@ alias py="python3"
 # just put an empty space so that I can get the prefix
 spaceship_space() {
   # color doesnt matter
-  spaceship::section "white" " "
+  spaceship::section::v4 --color "white" " "
 }
 
 spaceship_line_two() {
   # line two config of spaceship prompt
   # | languages
-  spaceship::section "white" " ├──"
+  spaceship::section::v4 --color "white" " ├──"
 }
 
 spaceship_line_three() {
   # line two config of spaceship prompt
   # | languages
-  spaceship::section "white" " └──"
+  spaceship::section::v4 --color "white" " └──"
 }
 
 # Starship customisations
@@ -163,8 +163,6 @@ SPACESHIP_PROMPT_ORDER=(
   line_two      # the line two thingy
   dir           # Current directory section
   package       # Package version
-  gradle        # Gradle section
-  maven         # Maven section
   node          # Node.js section
   ruby          # Ruby section
   elixir        # Elixir section
@@ -180,9 +178,7 @@ SPACESHIP_PROMPT_ORDER=(
   gcloud        # Google Cloud Platform section
   venv          # virtualenv section
   conda         # conda virtualenv section
-  pyenv         # Pyenv section
   dotnet        # .NET section
-  ember         # Ember.js section
   kubectl       # Kubectl context section
   terraform     # Terraform workspace section
   line_sep      # Line break
