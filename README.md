@@ -7,6 +7,8 @@ This repo contains most of my linux config files
 `settings.json` is the settings file for my vs code
 ## vue.json
 `vue.json` is the snippet file for autocompleting some tags of vue in vs code
+## hanyue.layout.Latte
+`hanyue.layout.latte` is the layout file for my latte layout configurations
 #### Prerequisites
 - zsh or zshell
 - the last 2 lines assume `go` is present and the directory `~/go/bin` is present
@@ -23,6 +25,8 @@ This repo contains most of my linux config files
     - Rust
 - Fonts used:
   - Cascadia Code
+- Latte Dock
+  - TODO: Add plasma widgets list here
 ---
 ## TODO
 - create script to automate install of programs
