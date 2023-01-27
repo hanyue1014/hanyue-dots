@@ -37,16 +37,4 @@
     "go.toolsManagement.autoUpdate": true,
     "editor.linkedEditing": true,
     "C_Cpp.codeAnalysis.updateDelay": 0,
-    "[html]": {
-        "editor.defaultFormatter": "vscode.html-language-features"
-    },
-    "[javascript]": {
-        "editor.defaultFormatter": "vscode.typescript-language-features"
-    },
-    "[typescript]": {
-        "editor.defaultFormatter": "vscode.typescript-language-features"
-    },
-    "[css]": {
-        "editor.defaultFormatter": "vscode.css-language-features"
-    },
 }
