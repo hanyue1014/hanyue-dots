@@ -1,0 +1,34 @@
+#!/usr/bin/bash
+TEMP=/tmp/current_wall
+
+# files=(~/.config/hypr/wallpapers/*)
+files=(~/Pictures/Sys/bg/*)
+
+scripts=~/.config/waybar/scripts
+
+cooldown=0.1
+
+
+while true
+do
+    case "$1" in
+        "cycle")
+            index=$(cat $TEMP)
+            index=$((index+1))
+            if [ $index -ge ${#files[@]} ]; then
+                index=0
+            fi
+            echo $index > $TEMP
+            $scripts/wall "${files[$index]}"
+            exit 0
+            ;;
+        "wall")
+            # issa picture icon
+            echo ""
+            ;;
+        *)
+            echo ""
+            ;;
+    esac
+    sleep $cooldown
+done
