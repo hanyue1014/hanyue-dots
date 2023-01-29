@@ -15,6 +15,9 @@ waybar &
 # wallpaper
 $scripts/wall $HOME/Pictures/Sys/bg/wallpaper1.jpg &
 
+# for chinese and japanese inputs, using fcitx5
+fcitx5 -d
+
 # other
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP &

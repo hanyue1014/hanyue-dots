@@ -1,4 +1,6 @@
 #!/usr/bin/bash
+
+# lock using swaylockd
 swaylockd \
 --screenshots \
 --indicator \
@@ -20,3 +22,9 @@ swaylockd \
 --inside-color 0011111b \
 --separator-color 00000000 \
 --fade-in 0.1 &
+
+# check if there is additional argument called suspend (used to call when lid closed)
+if [ "$1" = "suspend" ] 
+then
+    systemctl suspend
+fi

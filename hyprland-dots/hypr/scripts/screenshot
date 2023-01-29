@@ -1,3 +1,18 @@
 #!/usr/bin/bash
 
-grim -g "$(slurp)" - | wl-copy
+# grim -g "$(slurp)" - | wl-copy
+
+# screenshots and copy to clipboard
+# full - just screenshot
+# area - select an area and screenshot
+case "$1" in
+    "full")
+        grim - | wl-copy
+        ;;
+    "area")
+        grim -g "$(slurp)" - | wl-copy
+        ;;
+    *)
+        grim - | wl-copy
+	;;
+esac
