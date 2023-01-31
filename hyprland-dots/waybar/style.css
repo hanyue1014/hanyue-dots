@@ -34,11 +34,6 @@ window#waybar {
     color: 	#cba6f7 ;
 }
 
-#workspaces button:hover {
-    box-shadow: inherit;
-    text-shadow: inherit;
-}
-
 #workspaces button.active{
     padding: 0 20px;
     border-radius: 99999px;
@@ -52,6 +47,16 @@ window#waybar {
     animation: gradient 10s ease infinite;
     color: #fff;
 }
+
+/* #workspaces button:hover {
+    box-shadow: inherit;
+    text-shadow: inherit;
+}
+
+#workspaces button.active:hover {
+    box-shadow: inherit;
+    text-shadow: inherit;
+} */
 
 @keyframes gradient {
 	0% {

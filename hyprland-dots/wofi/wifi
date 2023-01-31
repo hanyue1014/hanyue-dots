@@ -4,14 +4,13 @@
 # 1 2 3
 # 8 0 4
 # 7 6 5
-POSITION=2
+POSITION=3
 
 #y-offset
-# hard coded value as position center not working
-YOFF=400
+YOFF=13
 
 #x-offset
-XOFF=0
+XOFF=-15
 
 #fields to be displayed
-FIELDS=SSID,SECURITY,BARS
+FIELDS=SSID,IN-USE,SECURITY,BARS
