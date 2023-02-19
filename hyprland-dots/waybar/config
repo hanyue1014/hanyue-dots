@@ -8,7 +8,8 @@
     "margin-bottom": -10,
     "spacing": 4, // Gaps between modules (4px)
     // Choose the order of the modules
-    "modules-left": ["custom/cycle_wall", "cpu", "memory", "temperature", "wlr/workspaces"],
+    // "modules-left": ["custom/cycle_wall", "cpu", "memory", "temperature", "wlr/workspaces"],
+    "modules-left": ["custom/cycle_wall", "wlr/workspaces"],
     "modules-center": ["hyprland/window"],
     "modules-right": ["tray", "network", "pulseaudio", "backlight", "battery", "clock"],
     // Modules configuration
