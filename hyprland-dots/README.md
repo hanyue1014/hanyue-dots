@@ -1,6 +1,9 @@
 # My dot files for my hyprland config
 Yanked and modified slightly from [Here](https://github.com/flick0/dotfiles/tree/dreamy)
 
+## Tested working on 0.21 beta
+Lid Switch and some window rules (eg initial window size) doesn't seem to work on my Honor Magicbook 14 amd version
+
 ## Dependencies (ref. from where i yanked)
 ANDD (Addons)
 - [wlogout](https://github.com/ArtsyMacaw/wlogout)
