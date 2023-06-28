@@ -1,40 +1,68 @@
 {
-    "workbench.colorTheme": "Andromeda Italic Bordered",
-    "editor.fontFamily": "'Cascadia Code', 'Droid Sans Mono', 'monospace', monospace, 'Droid Sans Fallback'",
-    "editor.fontSize": 22,
-    "diffEditor.wordWrap": "on",
-    "editor.wordWrapColumn": 100,
-    "editor.wordWrap": "wordWrapColumn",
-    "editor.rulers": [
-        80,
-        100
-    ],
-    "editor.fontLigatures": true,
-    "vim.useSystemClipboard": true,
-    "vim.handleKeys": {
-        "<C-d>": true,
-        "<C-c>": false,
-        "<C-a>": false,
-        "<C-x>": false
+  "workbench.colorTheme": "Andromeda Bordered",
+  "editor.fontFamily": "'Cascadia Code', 'Droid Sans Mono', 'monospace', monospace, 'Droid Sans Fallback'",
+  "editor.fontSize": 14,
+  "editor.wordWrapColumn": 110,
+  "editor.wordWrap": "wordWrapColumn",
+  "editor.rulers": [80],
+  "editor.fontLigatures": true,
+  "vim.useSystemClipboard": true,
+  "vim.handleKeys": {
+    "<C-d>": true,
+    "<C-c>": false,
+    "<C-a>": false,
+    "<C-x>": false
+  },
+  "vim.normalModeKeyBindingsNonRecursive": [
+    // make "change" command not override clipboard content
+    // mapping c -> "_c (change but copy the deleted text to the void)
+    {
+      "before": ["c"],
+      "after": ["\"", "_", "c"]
+    }
+  ],
+  "vim.visualModeKeyBindingsNonRecursive": [
+    // if I decide to delete lines in visual mode, then that means I probably don't want those lines anymore
+    // same should be applied to delete till end of line
+    {
+      "before": ["D"],
+      "after": ["\"", "_", "D"]
     },
-    "vim.insertModeKeyBindings": [
-        // {
-        //     "before": ["j", "k"],
-        //     "after": ["<Esc>"]
-        // },
-        {
-            "before": ["k", "j"],
-            "after": ["<Esc>"]
-        }
-    ],
-    "vim.timeout": 100,
-    "editor.cursorBlinking": "phase",
-    "editor.cursorSmoothCaretAnimation": true,
-    "emmet.includeLanguages": {
-        "javascript": "javascriptreact"
-    },
-    "editor.tabSize": 2,
-    "go.toolsManagement.autoUpdate": true,
-    "editor.linkedEditing": true,
-    "C_Cpp.codeAnalysis.updateDelay": 0,
+    {
+      "before": ["d", "d"],
+      "after": ["\"", "_", "d", "d"]
+    }
+  ],
+  "vim.insertModeKeyBindings": [
+    // {
+    //     "before": ["j", "k"],
+    //     "after": ["<Esc>"]
+    // },
+    {
+      "before": ["k", "j"],
+      "after": ["<Esc>"]
+    }
+  ],
+  "vim.timeout": 100,
+  "editor.cursorBlinking": "phase",
+  "editor.cursorSmoothCaretAnimation": "on",
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  },
+  "go.toolsManagement.autoUpdate": true,
+  "editor.linkedEditing": true,
+  "C_Cpp.codeAnalysis.updateDelay": 0,
+  "nasc-touchbar.addCursorBelow": false,
+  "nasc-touchbar.goToDefinition": false,
+  "nasc-touchbar.peekDefinition": true,
+  "nasc-touchbar.togglePanel": false,
+  "nasc-touchbar.commentLine": true,
+  "git.openRepositoryInParentFolders": "always",
+  "editor.tabSize": 2,
+  "editor.indentSize": "tabSize",
+  "[rust]": {
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true
+  },
+  "editor.stickyScroll.enabled": true,
 }
