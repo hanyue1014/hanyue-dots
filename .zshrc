@@ -231,9 +231,14 @@ SPACESHIP_DIR_PREFIX="["
 SPACESHIP_DIR_SUFFIX="] "
 SPACESHIP_DIR_TRUNC_PREFIX="../"
 
+# for venv
+SPACESHIP_VENV_PREFIX='('
+SPACESHIP_VENV_SUFFIX=')'
+
 # Env variable config
 export GOPATH="$HOME/go"
 export PATH="$PATH:$GOPATH/bin:$HOME/.local/bin"
+export PATH="$PATH:$HOME/dev_dependencies/flutter/bin"
 
 # evals
 eval spaceship_vi_mode_enable # enable vi mode provided by spaceship prompt
