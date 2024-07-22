@@ -239,6 +239,7 @@ SPACESHIP_VENV_SUFFIX=')'
 export GOPATH="$HOME/go"
 export PATH="$PATH:$GOPATH/bin:$HOME/.local/bin"
 export PATH="$PATH:$HOME/dev_dependencies/flutter/bin"
+export PATH="$PATH:$HOME/.local/share/bob/nvim-bin" # using bob to handle neovim versions (path is configured in mac, may or may not need to be changed in linux)
 
 # evals
 eval spaceship_vi_mode_enable # enable vi mode provided by spaceship prompt
