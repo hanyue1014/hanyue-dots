@@ -241,5 +241,10 @@ export PATH="$PATH:$GOPATH/bin:$HOME/.local/bin"
 export PATH="$PATH:$HOME/dev_dependencies/flutter/bin"
 export PATH="$PATH:$HOME/.local/share/bob/nvim-bin" # using bob to handle neovim versions (path is configured in mac, may or may not need to be changed in linux)
 
+# ZVM (use to manage installations of zig)
+export ZVM_INSTALL="$HOME/.zvm/self"
+export PATH="$PATH:$HOME/.zvm/bin"
+export PATH="$PATH:$ZVM_INSTALL/"
+
 # evals
 eval spaceship_vi_mode_enable # enable vi mode provided by spaceship prompt
