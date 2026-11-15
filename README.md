@@ -54,6 +54,20 @@ Running `./dot-setup.sh` when the repo is fully cloned does nothing with git its
 
 This script will act as a hook that runs everytime a package is stow-ed with the `dot-setup.sh` script, for post-stow checks (for example dependency checking) and extra actions (for example setup the `~/.pathrc` for shells, see [Path Loading](#path-loading)) that were supposed to be executed
 
+## 3. Use `dot-setup.sh -D` to unstow the configs
+
+```sh
+./dot-setup.sh -D <package> [package2 [package3...]]
+```
+
+Running `./dot-setup.sh -D` when using a sparse checkout version automatically removes the package from the sparse checkout list of the repository, unstows them (`stow -D`) and runs the `pre-unstow.sh` script in the packages
+
+Running `./dot-setup.sh -D` when the repo is fully cloned does nothing with git itself but still unstows the packages and runs the `pre-unstow.sh` script in the packages
+
+### `pre-unstow.sh`
+
+This script will act as a hook that runs everytime a package is unstow-ed with the `dot-setup.sh -D` script, to revert the changes made to the environment by [`post-stow.sh`](#post-stowsh)
+
 # Shells
 
 I try to make my shells feel as close to each other as possible, so you would see the same prompt, aliases and path loading mechanisms across bash, zsh and fish, and I don't tune them too much other than the prompts, I pretty much use them out of the box
