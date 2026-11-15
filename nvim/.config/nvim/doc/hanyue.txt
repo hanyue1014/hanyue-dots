@@ -1,0 +1,756 @@
+*hanyue.txt*                          How to use this Neovim configuration
+
+================================================================================
+CONTENTS                                                              *hanyue*
+
+  1. Layout ......................................... |hanyue-layout|
+  2. Keymaps set by this config ..................... |hanyue-keys|
+       core ........................................ |hanyue-keys-core|
+       windows ..................................... |hanyue-keys-window|
+       search ...................................... |hanyue-keys-search|
+       LSP ......................................... |hanyue-keys-lsp|
+       git ......................................... |hanyue-keys-git|
+       completion .................................. |hanyue-keys-cmp|
+  3. Built in keys worth knowing .................... |hanyue-builtins|
+  4. Special configuration .......................... |hanyue-special|
+  5. Maintenance .................................... |hanyue-maintenance|
+
+The leader key is <Space>. The local leader key is also <Space>.
+
+Based on kickstart.nvim. Uses `vim.pack`, the plugin manager built into
+Neovim. See |vim.pack|.
+
+================================================================================
+1. LAYOUT                                                      *hanyue-layout*
+
+>
+    init.lua                     load order only, no settings
+    lua/config/options.lua       leader key and vim.o settings
+    lua/config/indent.lua        tab widths, global and per filetype
+    lua/config/keymaps.lua       keymaps that need no plugin
+    lua/config/autocmds.lua      autocommands that need no plugin
+    lua/config/commands.lua      my own :Commands (:CopyPath)
+    lua/config/neovide.lua       GUI settings, does nothing outside Neovide
+    lua/config/pack.lua          vim.pack build hooks, gh() url helper
+    lua/custom/init.lua          loader for the folder below
+    lua/custom/plugins/*.lua     one file per plugin
+    lua/custom/colorschemes/*.lua  one file per colorscheme
+    lua/custom/lspconfig/*.lua   one file per language server's extras
+<
+Each plugin file is self contained. It calls `vim.pack.add` for what it
+needs, then that plugin's `setup()`. Deleting the file removes the plugin.
+
+`lua/custom/lspconfig/` holds whatever a server needs beyond its entry in
+the `servers` table (commands, autocommands, helpers), one file per server,
+so `lsp.lua` stays about wiring. `lsp.lua` loads every file in it.
+`clangd.lua`, see |hanyue-clangd|, and `sourcekit.lua`, which is a whole
+server on its own since mason can't install it (see LANGUAGE SERVERS).
+
+================================================================================
+2. KEYMAPS SET BY THIS CONFIG                                    *hanyue-keys*
+
+Everything below is an explicit `vim.keymap.set` in this config, or an
+explicit mapping passed to a plugin's `setup()`. Plugin defaults that were
+left alone are not listed here.
+
+--------------------------------------------------------------------------------
+CORE                                                        *hanyue-keys-core*
+
+`lua/config/keymaps.lua`
+
+    kj          insert      exit insert mode
+    <Esc>       normal      clear search highlight (nohlsearch)
+    <Esc><Esc>  terminal    exit terminal mode
+    j  k        normal, visual   one screen row on a wrapped line (gj/gk).
+                            With a count (5j) they still move real lines,
+                            so relativenumber jumps land where it says
+
+"Visual" in this document means visual mode only. Every visual mapping in
+the config is set for `x`, never `v`, because `v` also covers select mode,
+where typing should replace the selection (the |hanyue-clangd| popup
+starts that way). With `v`, typing J or > there would move or indent lines.
+
+Word delete in insert mode, like other editors:
+
+    <C-BS>      insert      delete previous word (<C-w>)
+    <C-h>       insert      same, terminals send ctrl+backspace as <C-h>
+    <C-Del>     insert      delete next word, joins the next line at EOL
+
+Indenting:
+
+    >  <        visual      indent / outdent, keeps the selection
+
+Black hole register, so the yank register survives. Normal and visual:
+
+    <leader>d   delete without yanking
+    <leader>D   delete to end of line without yanking
+    <leader>c   change without yanking
+    <leader>C   change to end of line without yanking
+    <leader>p   visual only, paste over selection without yanking it
+
+Moving lines:
+
+    J           visual      move selection down
+    K           visual      move selection up
+    <A-j>       normal      move current line down
+    <A-k>       normal      move current line up
+
+<A-j> and <A-k> are shown as <M-j> and <M-k> by `:map`. Same thing.
+
+Diagnostics, which-key group "[L]anguage [D]iagnostics". Every one opens
+the float, see |hanyue-diagnostics|:
+
+    <leader>ldp   previous diagnostic, same as [d
+    <leader>ldn   next diagnostic, same as ]d
+    <leader>ldl   every diagnostic on the current line
+    <leader>ldq   this file's diagnostics in the location list, full
+                  messages (vim.diagnostic.setloclist, was <leader>q)
+
+Jumping, mini.jump2d, `lua/custom/plugins/mini.lua`:
+
+    <leader>j   normal, operator   jump to any visible spot, in any window
+                of the tab: press it, type the character you're looking
+                at, then the label shown on it. After an operator it acts
+                up to the target (d<leader>j + target). Not visual. Not
+                dot-repeatable, deliberately kept as a plain function.
+
+mini's own `<CR>` mapping is disabled, it would take over Enter in every
+buffer, the quickfix list included.
+
+Breadcrumbs, dropbar, `lua/custom/plugins/dropbar.lua`:
+
+    <leader>lb  pick a winbar breadcrumb by label, opens its menu
+
+dropbar's suggested `[;` and `];` are left out. `[{` already jumps to the
+start of the enclosing block in brace languages, and the menu covers both.
+
+--------------------------------------------------------------------------------
+WINDOWS                                                   *hanyue-keys-window*
+
+`lua/config/keymaps.lua`. which-key group "[W]indow Actions".
+
+    <leader>wh <leader>wj <leader>wk <leader>wl   move focus
+    <leader>wv  split vertical
+    <leader>ws  split horizontal
+    <leader>wq  close window
+    <leader>wH  narrower, vertical resize -4
+    <leader>wL  wider, vertical resize +4
+    <leader>wJ  shorter, resize -4
+    <leader>wK  taller, resize +4
+    <leader>w=  equalize
+    <leader>wm  maximize
+
+The leader resizes need the whole sequence retyped each time. These
+repeat on their own:
+
+    <C-Up> <C-Down>       height +2 / -2
+    <C-Left> <C-Right>    width -2 / +2
+
+--------------------------------------------------------------------------------
+SEARCH                                                    *hanyue-keys-search*
+
+Everything that finds something lives under `<leader>f`, read as [F]ind or
+[F]ile. which-key group "[F]ind / [F]ile".
+
+Telescope, `lua/custom/plugins/telescope.lua`:
+
+    <leader>ff        find files
+    <leader>fb        find buffer
+    <leader>fg        live grep
+    <leader>fw        current word (normal and visual)
+    <leader>fd        diagnostics
+    <leader>fh        help tags
+    <leader>fk        keymaps
+    <leader>fc        commands
+    <leader>fr        resume last picker
+    <leader>fs        list Telescope builtins
+    <leader>fo        live grep, open files only
+    <leader>f.        recent files
+    <leader>fn        find files in the Neovim config directory
+
+neo-tree, `lua/custom/plugins/neo-tree.lua`:
+
+    <leader>fe        file explorer, toggles
+    <Esc>             inside the tree, closes it
+
+Paths, `lua/config/keymaps.lua`:
+
+    <leader>fp        show the current file's full path. Names otherwise
+                      show relative to the cwd, see |hanyue-cwd|.
+                      `:CopyPath` copies it instead.
+
+Deliberately not under the prefix:
+
+    <leader>/         fuzzy find in current buffer, dropdown, no preview
+
+Inside the buffers picker (`<leader>fb`) only, close a buffer without
+leaving the picker:
+
+    <C-b>       insert mode
+    dd          normal mode
+
+Both keys were picked because they are free in Telescope's defaults. `<C-d>`
+is preview scroll and `<C-x>` is open-in-split, so neither is safe to reuse.
+
+Inside the picker generally, <C-/> in insert mode or `?` in normal mode
+lists that picker's own keymaps.
+
+Inside a picker, <C-/> in insert mode or `?` in normal mode lists that
+picker's own keymaps.
+
+--------------------------------------------------------------------------------
+LSP                                                          *hanyue-keys-lsp*
+
+Buffer local, only present once a server attaches. which-key group
+"LSP Actions" on `gr`.
+
+Two ways in on purpose. `gr*` is the fast one and sits where Neovim's own
+LSP defaults already live. `<leader>l*` is the discoverable one, the
+"[L]anguage" which-key group, for when the letter has been forgotten.
+
+`lua/custom/plugins/lsp.lua`, buffer local:
+
+    grn         rename                 also <leader>lr
+    gra         code action            also <leader>la   (normal and visual)
+    grD         goto declaration, not definition
+
+`lua/config/keymaps.lua`, global, Neovim's built in `gc`:
+
+    <leader>lc  toggle comment         line in normal, selection in visual
+    <leader>th  toggle inlay hints, only if the server supports them
+
+`lua/custom/plugins/conform.lua`, global, works with no server attached:
+
+    grf         format buffer          also <leader>lf   (normal and visual)
+
+`lua/custom/plugins/telescope.lua`, a separate LspAttach, these open a
+picker rather than the built in handler:
+
+    grd         goto definition
+    grr         references
+    gri         implementation
+    grt         type definition
+    gO          document symbols
+    gW          workspace symbols
+
+Neovim already maps `grn` `gra` `grr` `gri` `grt` `gO` globally to the
+plain `vim.lsp.buf` functions. The buffer local versions above win while a
+server is attached.
+
+--------------------------------------------------------------------------------
+GIT                                                          *hanyue-keys-git*
+
+gitsigns, buffer local. which-key group "Git [H]unk" on `<leader>h`.
+
+    ]c          next hunk (falls back to diff mode ]c inside a diff)
+    [c          previous hunk
+    <leader>hs  stage hunk (normal and visual)
+    <leader>hr  reset hunk (normal and visual)
+    <leader>hS  stage buffer
+    <leader>hR  reset buffer
+    <leader>hp  preview hunk
+    <leader>hi  preview hunk inline
+    <leader>hb  blame line, full
+    <leader>hd  diff against index
+    <leader>hD  diff against last commit
+    <leader>hq  hunk quickfix list, this file
+    <leader>hQ  hunk quickfix list, whole repo
+    ih          text object, inside hunk (operator and visual)
+
+Toggles, which-key group "[T]oggle" on `<leader>t`:
+
+    <leader>tb  git blame on current line
+    <leader>tw  git word diff
+    <leader>th  LSP inlay hints (from lsp.lua, see above)
+
+--------------------------------------------------------------------------------
+TEXT OBJECTS AND COMPLETION                                  *hanyue-keys-cmp*
+
+mini.ai, the only mappings explicitly overridden in `setup()`:
+
+    aa          around next textobject
+    ii          inside next textobject
+
+These were moved off mini's defaults so they stop clashing with Neovim's
+treesitter incremental selection on `an` and `in`. See
+|treesitter-incremental-selection|.
+
+Start screen (mini.starter), buffer local:
+
+    j  k        move between items. They are taken out of the letters that
+                filter the list, so an item starting with j or k is reached
+                with j/k rather than by typing it
+    <CR>        run the item
+
+Formatting lives with the LSP actions now, see |hanyue-keys-lsp|.
+`<leader>f` is the [F]ind prefix.
+
+blink.cmp runs the `default` preset with a few overrides. Nothing is
+preselected when the menu opens, so <Tab> only accepts once you have picked
+an item. Otherwise it indents or aligns as normal.
+
+    <C-j> <C-k>     select next / previous (also <C-n> <C-p>, arrows)
+    <Tab>           accept the selected item, else snippet jump, else tab
+    <S-Tab>         snippet jump back
+    <C-y>           accept the top item without selecting it first
+    <C-space>       open the menu, or the docs if already open
+    <C-e>           hide the menu
+    <C-s>           signature help (built in; <C-k> now selects)
+
+See `:help blink-cmp-config-keymap`.
+
+================================================================================
+3. BUILT IN KEYS WORTH KNOWING                               *hanyue-builtins*
+
+None of these come from this config. They are Vim or Neovim defaults that
+rarely show up in tutorials, listed here so they are not forgotten.
+
+Neovim 0.11 and 0.12 defaults:
+
+    gc  gcc     toggle comment, operator and line
+    ]d  [d      next / previous diagnostic
+    ]D  [D      last / first diagnostic in buffer
+    ]q  [q      next / previous quickfix entry
+    ]b  [b      next / previous buffer
+    ]a  [a      next / previous argument list file
+    ]<Space>    add an empty line below the cursor
+    [<Space>    add an empty line above the cursor
+    gx          open the file path or URL under the cursor
+    <C-W>d      show diagnostics under the cursor in a float
+    grx         run the code lens under the cursor
+    <C-S>       signature help, insert and visual mode
+    an  in      treesitter, select parent / child node
+    ]n  [n      treesitter, next / previous node
+    ]N  [N      treesitter, next / previous sibling node
+
+Jumping and returning:
+
+    <C-o>       jump back in the jumplist            |CTRL-O|
+    <C-i>       jump forward in the jumplist         |CTRL-I|
+    <C-t>       pop the tag stack, returns from a goto definition |CTRL-T|
+    <C-6>       switch to the alternate file         |CTRL-6|
+    ''          back to the line you jumped from     |''|
+    `.          to the position of the last edit     |`.|
+    g;  g,      backward / forward through the changelist  |g;| |g,|
+    gv          reselect the last visual selection   |gv|
+    gi          insert where you last left insert mode |gi|
+
+Screen position:
+
+    zz  zt  zb  cursor line to middle / top / bottom  |zz| |zt| |zb|
+
+Editing that people forget exists:
+
+    <C-a>  <C-x>    increment / decrement the number under the cursor
+    gJ              join lines without inserting a space     |gJ|
+    gu  gU          lowercase / uppercase operator           |gu| |gU|
+    gq              format lines to textwidth                |gq|
+    ga              show the character code under the cursor |ga|
+    g&              repeat the last :s across the whole file |g&|
+    g?              rot13 operator, mostly a curiosity       |g?|
+    g<C-g>          word, line and byte count of the buffer  |g_CTRL-G|
+    <C-v>           visual block mode                        |CTRL-V|
+    o               in visual mode, jump to the other end    |v_o|
+
+Command line and insert mode:
+
+    q:              open the command line window, editable history  |q:|
+    <C-r><C-w>      in the command line, insert the word under the
+                    cursor                          |c_CTRL-R_CTRL-W|
+    <C-r>           in insert mode, paste a register          |i_CTRL-R|
+    <C-o>           in insert mode, run one normal command    |i_CTRL-O|
+
+Files and windows:
+
+    gf              open the file under the cursor            |gf|
+    gd              goto local declaration, works with no LSP |gd|
+    K               keyword lookup, the LSP hover when attached  |K|
+    <C-w>o          close every window except this one     |CTRL-W_o|
+    <C-w>T          move this window into a new tab         |CTRL-W_T|
+
+Undo across time, not steps:
+
+    :earlier 10m    the buffer as it was ten minutes ago     |:earlier|
+    :later 10m      forward again
+
+================================================================================
+4. SPECIAL CONFIGURATION                                      *hanyue-special*
+
+The non obvious decisions in this config, and why they are there.
+
+LOAD ORDER
+`init.lua` requires `config.options`, `config.indent`, `config.pack`,
+`config.keymaps`, `config.autocmds`, `config.commands`, `config.neovide`,
+then `custom`. The first three are
+order dependent. `config.options` sets the leader key, which must happen
+before any plugin loads or the plugin captures the wrong leader.
+`config.pack` registers the `PackChanged` build hooks, which must happen
+before anything calls `vim.pack.add`.
+
+`lua/custom/init.lua` requires `custom.plugins.colorscheme` by name first,
+then globs the rest of the folder with `vim.fs.dir()`. The colorscheme is
+named explicitly so there is no flash of the default theme on startup.
+`require` caches, so it does not load twice. The order of everything else
+is unspecified, so co dependent plugins belong in one file.
+
+INDENTATION
+Global default is 4 spaces with `expandtab`. Per filetype overrides are
+`FileType` autocommands writing buffer local options (`vim.bo`), not
+global ones, so a lua split and a python split keep their own widths.
+
+    2 spaces    lua yaml json jsonc toml html css scss javascript
+                typescript markdown sh bash zsh xml
+    4 spaces    python c cpp rust java bitbake cmake meson
+    hard tabs   make 8, go 4, dts 8, kconfig 8, gitconfig 4
+
+The hard tab ones are requirements, not taste. make needs real tabs, gofmt
+mandates them, dts and kconfig follow kernel style.
+
+This complements guess-indent.nvim, which handles existing files. These
+rules cover the case guess-indent cannot, a new empty file.
+
+CLIPBOARD
+`clipboard` is set inside `vim.schedule()` because setting it during
+startup is slow.
+
+OSC 52 is configured only when `vim.env.SSH_TTY` is set, because only a
+remote session needs it. Local desktop, native Windows and WSL are all
+auto detected by Neovim. It is deliberately copy only, since most
+terminals refuse to let a program read the clipboard and the read would
+hang or silently fail.
+
+NERD FONT
+`vim.g.have_nerd_font` is `true`, and the font is FiraCode Nerd Font. See
+README.md for installing it.
+
+Four things are gated on that flag: which-key icons, mini.statusline
+icons, the mini.icons module, and neo-tree's icon set. mini.icons also
+calls `mock_nvim_web_devicons()`, which is how plugins that ask for
+`nvim-web-devicons` by name, telescope and neo-tree among them, end up
+with icons without that plugin being installed.
+
+Set it back to `false` on a machine where the font can't be installed.
+Everything gated on it falls back to plain text rather than breaking.
+
+COLORSCHEME
+Each colorscheme is one file in `lua/custom/colorschemes/`, which
+installs and sets it up and nothing else. `colorscheme.lua` loads every
+file there, then applies the default named at its top. Adding one is a
+new file, removing one is deleting its file and, if it was the default,
+changing that name. All of them stay installed, so `:colorscheme` or
+`:Telescope colorscheme` switches for the session.
+
+FORMATTING, AND A GOTCHA
+lua_ls formatting is turned off in two separate places, the
+`documentFormattingProvider` capability in `on_init` and `format.enable`
+in settings. The intent is for stylua to do it instead.
+
+But conform's `formatters_by_ft` is still empty, and `lsp_format` is set
+to `'fallback'`. So on a lua file `grf` falls back to the language
+server, whose formatting was just disabled, and nothing happens. Adding
+`lua = { 'stylua' }` to `formatters_by_ft` completes the intent.
+
+`format_on_save` is wired up but its `enabled_filetypes` table is empty,
+so nothing formats on save right now. Add filetypes there to turn it on.
+
+LANGUAGE SERVERS
+Every key of the `servers` table gets installed by mason and enabled by
+`vim.lsp.enable`. Two groups.
+
+Always registered, mason downloads these as prebuilt binaries and they
+need nothing else present:
+
+    clangd (c, cpp), ols (odin), rust_analyzer, zls (zig), lua_ls, stylua
+
+Registered only when a tool is on PATH, because mason has to build these
+or fetch them from a language package registry, and a missing toolchain
+means the install fails and retries on every startup:
+
+    gopls    needs `go`
+    pyright  needs `npm`
+    ruff     needs `pip`
+    jdtls    needs `java`
+
+`pip` is checked rather than `python` because Windows ships a stub
+`python.exe` that only opens the Microsoft Store, and it would pass an
+executable check.
+
+This gating exists so the same config works on machines with different
+things installed. Install a toolchain, restart, the server appears.
+
+Swift is a third kind. Its server, `sourcekit` (the `sourcekit-lsp`
+binary), comes with the Swift toolchain and mason has no package for it,
+so it is not in the `servers` table at all. `lua/custom/lspconfig/
+sourcekit.lua` enables it when `sourcekit-lsp` is on PATH. Same idea:
+install Swift, restart, it appears.
+
+    - A lone script works without a project or `git init`. It is checked
+      on its own, so it doesn't see other swift files next to it.
+    - C, C++ and Objective-C files inside a Swift project (Package.swift,
+      an Xcode project, buildServer.json) go to sourcekit instead of
+      clangd, so the C side of Swift interop gets the package's build
+      settings. Everywhere else clangd keeps them. Without Swift installed
+      clangd keeps them all.
+
+Only tested with a fake `sourcekit-lsp`, never against a real toolchain.
+If Swift misbehaves, `:checkhealth vim.lsp` shows which server attached
+and its root.
+
+`stylua` sits in the `servers` table even though it is a formatter, not a
+server. That is inherited from kickstart. It is how stylua gets into
+`ensure_installed`, which is built from `vim.tbl_keys(servers)`. It has no
+`cmd` and no `filetypes`, so `vim.lsp.enable` on it never attaches to
+anything and it is harmless.
+
+`mason-lspconfig` runs with `automatic_enable = false`, so servers
+installed by hand through `:Mason` are not switched on behind your back.
+
+TREESITTER
+Pinned to the `main` branch. Parsers are built with the tree-sitter CLI,
+which is an external requirement listed in README.md, not something
+Neovim provides. Built parsers land in `stdpath('data')/site/parser`, not
+inside the plugin folder, which is worth knowing when checking whether a
+build actually produced anything.
+
+A C compiler is needed too, and on Windows that part bites. The CLI
+compiles through Rust's `cc` crate, and the Windows build of the CLI
+targets MSVC, so it shells out to `cl.exe`. The README's choco line
+installs mingw (gcc) and no MSVC, so every parser fails with "program not
+found" and highlighting quietly falls back to regex syntax.
+
+`treesitter.lua` sets `CC=gcc` when it sees Windows, no `cl.exe`, and a
+working `gcc`, because `cc` honours CC and switches to GNU style flags
+when the compiler isn't named like cl.exe. mingw alone is then enough and
+MSVC is not needed. The guard does nothing when `cl.exe` exists or when CC
+is already set by hand, so a real MSVC setup is untouched.
+
+If parsers still fail, check `gcc --version` in a fresh shell. Chocolatey
+adds it to PATH at install time, but an editor or terminal that was
+already open keeps the stale PATH until restarted.
+
+`lsp.lua` adds `tree-sitter-cli` to the mason install list only when
+`tree-sitter` is not already on PATH. mason installs under
+`stdpath('data')`, so this needs no administrator rights and covers
+machines without sudo. On a machine where the README's install line was
+already run, the check skips it and there is no second copy.
+
+On a fresh machine mason fetches it in the background, so the CLI does
+not exist yet at the moment `treesitter.lua` runs. Rather than calling
+`install()` and getting a red ENOENT, the parser install waits: on
+VimEnter it builds straight away if `tree-sitter` is on PATH, otherwise
+it listens for `MasonToolsUpdateCompleted`, which mason-tool-installer
+fires once its queue is done. So parsers still build on the first
+launch, just a little later in it.
+
+The check sits on VimEnter and not at file scope because mason is what
+puts its bin folder on PATH, and this folder is loaded by globbing, so
+`lsp.lua` is not guaranteed to have run yet.
+
+Treesitter folds are present but commented out in `treesitter.lua`.
+
+BREADCRUMBS AND INDENT GUIDES
+Two plugins meant to be read together, so it's always clear whether the
+cursor is in a loop, or in the condition that ends it.
+
+`dropbar.lua` (dropbar.nvim) puts the file path and every block around
+the cursor in the winbar, like `main > for > if`. Its sources function is
+dropbar's default with treesitter and lsp swapped: language servers only
+report functions and types, so with lsp first loops and ifs never show.
+lsp stays as the fallback where there is no parser. Blocks are named by
+the start of their text up to the first non-word character, so C shows
+a bare `if`, not its condition.
+
+`indent-blankline.lua` (indent-blankline, `ibl`) draws a guide at every
+indent level, and highlights the one for the treesitter scope under the
+cursor. Every level on purpose, not just the current one like
+mini.indentscope, so the outer loop's guide is still visible from inside
+an if. Defaults, except the scope's first and last lines aren't
+underlined (`show_start` / `show_end` off). The default excludes already
+skip nofile buffers, so the start screen and neo-tree stay clean.
+
+dropbar was picked over nvim-treesitter-context's sticky headers because
+those float over the top buffer lines in a scratch window ibl never draws
+in, which cut the guides off. The winbar covers no lines, so the guides
+run all the way up.
+
+NEO-TREE
+Ported from `lua/kickstart/plugins/neo-tree.lua`, which was already written
+for vim.pack, into `lua/custom/plugins/neo-tree.lua` so it joins the normal
+plugin folder.
+
+Opens on the right, so toggling it does not shove the code sideways.
+
+`filtered_items` shows everything, dotfiles and gitignored included,
+because this is a config repo and plenty of what matters is hidden by one
+rule or the other. `H` inside the tree is neo-tree's own `toggle_hidden`
+and hides them again.
+
+`follow_current_file` is enabled. It only finds and focuses the current
+file inside the tree, it does not re-root or narrow anything, the full
+tree stays. Its companion `leave_dirs_open` is left at neo-tree's default
+`false`, so directories auto expanded to reveal a file collapse again
+afterwards.
+
+`bind_to_cwd = false`: the tree's root and Neovim's cwd are independent.
+neo-tree's default ties them both ways, so `.` on a folder, <BS>, or
+answering yes to "File not in cwd. Change cwd?" ran `:tcd` on the whole
+tab, and live grep and friends started searching somewhere else. Now
+those only move the tree's own root. The cost: `:cd` no longer moves the
+tree either.
+
+Opening the tree reveals the current buffer only when it is a real file
+(`buftype` empty), in `<leader>fe` and in the start screen's Explorer
+item. On the start screen buffer (`ministarter://1`) neo-tree used to
+treat that name as a file outside the cwd and ask to change cwd to
+`ministarter:/`.
+
+Opening a file from the tree closes the tree, through a `file_opened`
+event handler.
+
+Icons follow `vim.g.have_nerd_font`, which is currently `true`. In that
+case neo-tree's own defaults are left untouched: folder glyphs come from
+neo-tree, and per filetype file icons come from mini.icons, because
+neo-tree's icon provider asks for `nvim-web-devicons` at render time and
+mini.icons mocks that name.
+
+If the flag is `false` a plain ASCII table replaces all of it, otherwise
+those glyphs would render as tofu boxes.
+
+CONDITIONAL PLUGIN
+`telescope-fzf-native.nvim` is only added to the plugin list when `make`
+is executable, since it has to be compiled. Both Telescope extensions are
+loaded with `pcall`, so a missing one is not an error.
+
+BUILD HOOKS
+`config/pack.lua` registers a `PackChanged` autocommand that runs `make`
+for telescope-fzf-native, `make install_jsregexp` for LuaSnip on non
+Windows systems, and `TSUpdate` for nvim-treesitter. Failures are reported
+through `vim.notify`.
+
+VERSION PINS
+LuaSnip is pinned to the `2.*` range and blink.cmp to `1.*`, using
+`vim.version.range()`. blink.cmp's fuzzy matcher is set to the Lua
+implementation rather than the Rust one, so nothing needs downloading.
+
+DIAGNOSTICS                                             *hanyue-diagnostics*
+Virtual text on, virtual lines off, no updates while in insert mode,
+severity sorted, rounded float border, underline only for WARN and above.
+Jumping with `[d` or `]d` opens the float automatically, which is the
+`jump.on_jump` handler. `<leader>ldp` and `<leader>ldn` call the same
+`vim.diagnostic.jump()`, so they get the float from that one handler too.
+
+The virtual text is cut off at the window edge for long messages. The
+float (any of the keys above) and the list (`<leader>ldq`, it wraps) both
+show the whole message.
+
+WHICH-KEY
+`delay = 500`, so the popup only shows after pausing half a second on a
+prefix. Typing a mapping you already know never flashes it. Pressing
+<Space> and waiting is the way to explore.
+
+THE CWD AND FILE NAMES                                          *hanyue-cwd*
+Nothing in this config changes the cwd. Only `:cd`, `:lcd` and `:tcd`
+typed by hand do. `:pwd` shows it. See NEO-TREE above for the one plugin
+that used to.
+
+Every buffer's name shows relative to the cwd (`src/x.c`) however it was
+opened. A buffer keeps the name it was opened with, and the start screen
+opens relative paths while telescope and neo-tree open full ones, so `:f`
+and <C-g> showed either. A `BufWinEnter` autocommand in `autocmds.lua`
+runs `:cd .`, which re-shortens every name without moving anywhere:
+`noautocmd` so no DirChanged fires, and `lcd`/`tcd` when the window or tab
+has its own directory so that stays. Renaming the buffer instead would
+break `:w` (E13: File exists).
+
+The full path: `<leader>fp` shows it, `:CopyPath` copies it, `1<C-g>`
+prints it.
+
+START SCREEN
+mini.starter, set up in `mini.lua`: ASCII header and greeting, an Actions
+section (find file, grep, explorer, new file, config, update plugins,
+quit), the six most recent files in the cwd, and a footer with the date,
+plugin count and version. It takes over the empty startup buffer and wipes
+it when a file is opened, so no `[No Name]` is left in the buffer list.
+`silent = true` stops the "(mini.starter) Query:" line, which used to
+linger after leaving the screen.
+
+CLANGD INCLUDE PATHS                                         *hanyue-clangd*
+`lua/custom/lspconfig/clangd.lua`. VS Code's `${workspaceFolder}/**` for
+clangd: it scans a folder for every directory holding a header and writes
+them into a `compile_flags.txt` as `-I` lines, nothing else.
+
+    :ClangdScan     open the popup, scan, write compile_flags.txt
+    :ClangdReset    undo it in a folder: removes a compile_flags.txt that
+                    is only -I lines, and an empty .clangd-ignore. Hand
+                    written ones are left alone. Asks again this session
+    :ClangdStatus   which flags file clangd would use for this buffer,
+                    by repeating clangd's own lookup
+
+When clangd attaches to a file inside the startup folder (`nvim <dir>`,
+`nvim .`, or plain `nvim`, never `nvim <file>`), it walks up from the file
+to the startup folder or `.git`. If none of `compile_commands.json`,
+`compile_flags.txt`, `.clangd`, `.clangd-ignore` is on the way, the popup
+opens. At most once per session.
+
+The popup is two floats in the theme's colours: the explanation, and a
+one line box holding the folder, selected in select mode.
+
+    <CR> with it selected       scan that folder
+    another folder, <CR>        scan that one
+    n / no (any case), <CR>     write .clangd-ignore, never ask there again
+    empty, <Esc>, leaving it    not now, nothing written
+Keys are ignored for the first 300ms, so keys already being typed when it
+pops up can't answer it.
+
+It refuses to write in $HOME or a drive root, since clangd searches every
+parent folder and the file would apply to every C file under it. Scans
+stop, writing nothing, past 8 levels deep or 256 header folders: point it
+at a narrower folder then. `build`, `out`, `node_modules` and hidden
+folders are skipped. The generated names are added to `.git/info/exclude`.
+TODO in the code: in a linked git worktree that exclude file is the wrong
+one.
+
+MOUSE
+`mouse` is `'a'`, mainly so the scroll wheel works. With it on, the
+terminal hands every click to Neovim, so plain right-click opens Neovim's
+popup menu and plain drag makes a visual selection.
+
+Hold Shift to give the click back to the terminal. Most terminals honour
+this (iTerm2 uses Option instead):
+
+    Shift + drag          the terminal's own text selection
+    Shift + right-click   the terminal's own copy / paste
+
+It was `''` for a while, which kept the terminal's clicks but lost
+scrolling.
+
+OTHER SMALL THINGS
+nvim-autopairs closes brackets and quotes as you type them. It's the one
+kickstart example still loaded, from the bottom of `init.lua`
+(`kickstart.plugins.autopairs`), not from `lua/custom/plugins/`.
+mini.statusline's location section is overridden to `%2l:%-2v`.
+todo-comments runs with `signs = false`.
+`vim.loader.enable()` is the first line executed, for the module cache.
+`vim.o.showmode` is commented out in `options.lua` with a TODO.
+
+================================================================================
+5. MAINTENANCE                                            *hanyue-maintenance*
+
+Update plugins: >
+    :lua vim.pack.update()
+<
+See pending updates without fetching: >
+    :lua vim.pack.update(nil, { offline = true })
+<
+    :Mason                        server and tool status, g? for help
+    :checkhealth                  everything
+    :checkhealth nvim-treesitter  parser and CLI status
+    :Tutor                        the built in Vim tutor
+
+`<leader>fk` searches every keymap currently defined, which is the
+authoritative answer when this document and the config disagree.
+
+To add a plugin, drop a new file in `lua/custom/plugins/`. It is picked up
+automatically.
+
+ vim:tw=78:ts=8:ft=help:norl:
