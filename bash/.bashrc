@@ -1,5 +1,9 @@
 . ~/git-prompt.sh
 
+alias l=ls
+alias la=ls -a
+alias ll=ls -la
+
 exit_status_with_color() {
     local s=$?
     if (( s == 0 )); then
