@@ -65,11 +65,23 @@ require('telescope').setup {
     -- window's title, so there's always somewhere to read it in full.
     dynamic_preview_title = true,
 
+    -- ignore .git clutters since we will be setting find_files.hidden = true
+    file_ignore_patterns = { "^.git/" },
+
     -- mappings = {
     --   i = { ['<c-enter>'] = 'to_fuzzy_refine' },
     -- },
   },
   pickers = {
+    find_files = {
+      hidden = true,
+    },
+    live_grep = {
+      -- also grep hidden files except contents in .git (--glob and the string that follows are together)
+      additional_args = function()
+        return { "--hidden", "--glob", "!**/.git/*" }
+      end
+    },
     buffers = {
       -- Close buffers from inside the picker. The list refreshes and the
       -- prompt stays open, so I can wipe out several in one go.
